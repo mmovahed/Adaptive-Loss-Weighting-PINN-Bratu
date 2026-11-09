@@ -1,0 +1,4 @@
+method,n_ranked_cases,mean_rank,wins
+lra,20,1.45,13
+relobralo,20,2.3,4
+ddqn,20,2.25,3

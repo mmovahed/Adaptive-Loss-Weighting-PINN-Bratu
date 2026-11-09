@@ -1,0 +1,16 @@
+scope,test,comparison,n_cases,statistic,p_value,p_holm
+all_methods,Friedman,all,20,17.0,0.0019329495056011196,
+all_methods,Wilcoxon_two_sided,fixed_equal vs fixed_selected,20,20.0,0.0007076263427734375,0.007076263427734375
+all_methods,Wilcoxon_two_sided,fixed_equal vs lra,20,20.0,0.0007076263427734375,0.007076263427734375
+all_methods,Wilcoxon_two_sided,fixed_equal vs relobralo,20,71.0,0.21616744995117188,0.8646697998046875
+all_methods,Wilcoxon_two_sided,fixed_equal vs ddqn,20,97.0,0.7841262817382812,1.0
+all_methods,Wilcoxon_two_sided,fixed_selected vs lra,20,90.0,0.5958194732666016,1.0
+all_methods,Wilcoxon_two_sided,fixed_selected vs relobralo,20,39.0,0.012079238891601562,0.06039619445800781
+all_methods,Wilcoxon_two_sided,fixed_selected vs ddqn,20,36.0,0.00830841064453125,0.0498504638671875
+all_methods,Wilcoxon_two_sided,lra vs relobralo,20,27.0,0.0023250579833984375,0.0186004638671875
+all_methods,Wilcoxon_two_sided,lra vs ddqn,20,29.0,0.0031528472900390625,0.022069931030273438
+all_methods,Wilcoxon_two_sided,relobralo vs ddqn,20,97.0,0.7841262817382812,1.0
+adaptive_methods,Friedman,all,20,9.100000000000023,0.010567204383852532,
+adaptive_methods,Wilcoxon_two_sided,lra vs relobralo,20,27.0,0.0023250579833984375,0.0069751739501953125
+adaptive_methods,Wilcoxon_two_sided,lra vs ddqn,20,29.0,0.0031528472900390625,0.0069751739501953125
+adaptive_methods,Wilcoxon_two_sided,relobralo vs ddqn,20,97.0,0.7841262817382812,0.7841262817382812
