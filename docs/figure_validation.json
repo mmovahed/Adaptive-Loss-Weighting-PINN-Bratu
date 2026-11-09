@@ -1,0 +1,56 @@
+[
+  {
+    "figure": 1,
+    "fidelity": "pixel_identical",
+    "source": "recovered",
+    "check": "Poppler PDF render 750px"
+  },
+  {
+    "figure": 2,
+    "fidelity": "pixel_identical",
+    "source": "recovered",
+    "check": "Poppler PDF render 750px"
+  },
+  {
+    "figure": 3,
+    "fidelity": "pixel_identical",
+    "source": "recovered",
+    "check": "Poppler PDF render 750px"
+  },
+  {
+    "figure": 4,
+    "fidelity": "pixel_identical",
+    "source": "recovered",
+    "check": "Poppler PDF render 750px"
+  },
+  {
+    "figure": 5,
+    "fidelity": "pixel_identical",
+    "source": "recovered",
+    "check": "Poppler PDF render 750px"
+  },
+  {
+    "figure": 6,
+    "fidelity": "pixel_identical",
+    "source": "recovered",
+    "check": "Poppler PDF render 750px"
+  },
+  {
+    "figure": 7,
+    "fidelity": "numerical_and_semantic",
+    "source": "reconstructed",
+    "check": "Bratu analytical bifurcation and stored prediction arrays"
+  },
+  {
+    "figure": 8,
+    "fidelity": "numerical_and_semantic",
+    "source": "reconstructed",
+    "check": "Bratu analytical bifurcation and stored prediction arrays"
+  },
+  {
+    "figure": 9,
+    "fidelity": "numerical_and_semantic",
+    "source": "reconstructed",
+    "check": "Bratu analytical bifurcation and stored prediction arrays"
+  }
+]

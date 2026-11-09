@@ -1,0 +1,46 @@
+#!/bin/bash
+#PBS -S /bin/bash
+#PBS -q lumer
+#PBS -N bratu_gen_smoke
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=01:00:00
+#PBS -j oe
+set -o pipefail
+PROJECT_ROOT=${BRATU_PROJECT_ROOT:?Export BRATU_PROJECT_ROOT to your repository directory}
+BASE=${BRATU_WORK_BASE:-$PROJECT_ROOT}
+ENV=${BRATU_PYTHON_ENV:-$HOME/.conda/envs/bratu}
+GLIBC=/share/Application/glibc/glibc-2.17/glibc-2.17/install
+TORCHROOT=$BASE/bratu_torch151
+TORCHLIB=$TORCHROOT/torch/lib
+PY_PRIMARY=$BASE/runtime/python37_glibc217
+PY_FALLBACK=$ENV/bin/python
+if [ -x "$PY_PRIMARY" ]; then PY=$PY_PRIMARY;
+elif [ -x "$PY_FALLBACK" ]; then PY=$PY_FALLBACK;
+else echo 'ERROR: no compatible Cluster Python'; exit 127; fi
+cd "$PROJECT_ROOT" || exit 2
+mkdir -p results/generalizability_v1/smoke/logs
+LOG=results/generalizability_v1/smoke/logs/smoke_all.log
+: > "$LOG"
+echo "SMOKE starting host=$(hostname) python=$PY" | tee -a "$LOG"
+PYTHONHOME="$ENV" PYTHONPATH="$TORCHROOT:$PROJECT_ROOT" \
+LD_LIBRARY_PATH="$GLIBC/lib:$ENV/lib:$TORCHLIB:/usr/lib64:/lib64" \
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+"$PY" -u tests/test_generalizability.py 2>&1 | tee -a "$LOG"
+RC=${PIPESTATUS[0]}
+if [ "$RC" -ne 0 ]; then echo "SMOKE_FAILED equations rc=$RC" | tee -a "$LOG"; exit "$RC"; fi
+for benchmark in helmholtz2d burgers1d_time; do
+  for method in fixed_equal lra relobralo ddqn; do
+    echo "SMOKE_CASE benchmark=$benchmark method=$method" | tee -a "$LOG"
+    PYTHONHOME="$ENV" PYTHONPATH="$TORCHROOT:$PROJECT_ROOT" \
+    LD_LIBRARY_PATH="$GLIBC/lib:$ENV/lib:$TORCHLIB:/usr/lib64:/lib64" \
+    OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+    "$PY" -u experiments/generalizability_worker.py \
+       --benchmark "$benchmark" --method "$method" --seed 42 \
+       --mode smoke --steps 60 --candidates 2 --collocation 16 \
+       --validation 30 --test 100 --hidden 8 --warmup 2 --interval 2 --overwrite \
+       2>&1 | tee -a "$LOG"
+    RC=${PIPESTATUS[0]}
+    if [ "$RC" -ne 0 ]; then echo "SMOKE_FAILED benchmark=$benchmark method=$method rc=$RC" | tee -a "$LOG"; exit "$RC"; fi
+  done
+done
+echo 'SMOKE_PASS all 8 method/benchmark combinations' | tee -a "$LOG"

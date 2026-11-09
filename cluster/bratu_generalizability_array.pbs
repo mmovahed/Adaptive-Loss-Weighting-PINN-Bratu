@@ -1,0 +1,43 @@
+#!/bin/bash
+#PBS -S /bin/bash
+#PBS -q lumer
+#PBS -N bratu_gen_v1
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=24:00:00
+#PBS -t 0-39
+#PBS -j oe
+set -o pipefail
+
+# 2 PDE benchmarks x 4 methods x 5 outer seeds = 40 cases.
+# Each case trains five PINNs (15,000 optimizer steps per candidate).
+PROJECT_ROOT=${BRATU_PROJECT_ROOT:?Export BRATU_PROJECT_ROOT to your repository directory}
+BASE=${BRATU_WORK_BASE:-$PROJECT_ROOT}
+ENV=${BRATU_PYTHON_ENV:-$HOME/.conda/envs/bratu}
+GLIBC=/share/Application/glibc/glibc-2.17/glibc-2.17/install
+TORCHROOT=$BASE/bratu_torch151
+TORCHLIB=$TORCHROOT/torch/lib
+PY_PRIMARY=$BASE/runtime/python37_glibc217
+PY_FALLBACK=$ENV/bin/python
+if [ -x "$PY_PRIMARY" ]; then PY=$PY_PRIMARY;
+elif [ -x "$PY_FALLBACK" ]; then PY=$PY_FALLBACK;
+else echo 'ERROR: no compatible Cluster Python'; exit 127; fi
+cd "$PROJECT_ROOT" || exit 2
+ID="${PBS_ARRAYID:-${PBS_ARRAY_INDEX:-}}"
+if [ -z "$ID" ] || [ "$ID" -lt 0 ] || [ "$ID" -gt 39 ]; then
+  echo "ERROR: PBS array index missing or invalid ($ID)"; exit 2
+fi
+LOGDIR="$PROJECT_ROOT/results/generalizability_v1/production/logs"
+mkdir -p "$LOGDIR"
+LOG="$LOGDIR/generalizability_$(printf '%02d' "$ID").log"
+echo "GENERALIZABILITY protocol=v1 index=$ID host=$(hostname) python=$PY"
+# CRITICAL: Scope custom glibc to Python only; system tee/bash remain unchanged.
+PYTHONHOME="$ENV" \
+PYTHONPATH="$TORCHROOT:$PROJECT_ROOT" \
+LD_LIBRARY_PATH="$GLIBC/lib:$ENV/lib:$TORCHLIB:/usr/lib64:/lib64" \
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
+"$PY" -u experiments/generalizability_worker.py --index "$ID" --mode production \
+--steps 15000 --candidates 5 --collocation 256 --validation 512 --test 2000 \
+--hidden 64 --warmup 200 --interval 20 2>&1 | tee "$LOG"
+RC=${PIPESTATUS[0]}
+echo "GENERALIZABILITY_JOB_END index=$ID exit=$RC host=$(hostname)" | tee -a "$LOG"
+exit "$RC"

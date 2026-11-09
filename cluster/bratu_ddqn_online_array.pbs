@@ -1,0 +1,102 @@
+#!/bin/bash
+#PBS -S /bin/bash
+#PBS -q lumer
+#PBS -N bratu_ddqn_v2
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=12:00:00
+#PBS -t 80-99
+#PBS -j oe
+
+# Backward-compatible filename, but this is now a DDQN-only BENCHMARK-V2 rerun.
+# IDs 80..99 match the DDQN block of cluster/bratu_array.pbs.
+
+PROJECT_ROOT=${BRATU_PROJECT_ROOT:?Export BRATU_PROJECT_ROOT to your repository directory}
+BASE=${BRATU_WORK_BASE:-$PROJECT_ROOT}
+ENV=${BRATU_PYTHON_ENV:-$HOME/.conda/envs/bratu}
+GLIBC=/share/Application/glibc/glibc-2.17/glibc-2.17/install
+PY_PRIMARY=$BASE/runtime/python37_glibc217
+PY_FALLBACK=$ENV/bin/python
+TORCHROOT=$BASE/bratu_torch151
+TORCHLIB=$TORCHROOT/torch/lib
+PROTOCOL=bratu_adaptive_benchmark_v2
+SELECTION_PROTOCOL=matched_best_of_n_validation_v2
+
+cd "$PROJECT_ROOT" || exit 2
+ID="${PBS_ARRAYID:-${PBS_ARRAY_INDEX:-}}"
+if [ -z "$ID" ] || [ "$ID" -lt 80 ] || [ "$ID" -gt 99 ]; then
+    echo "ERROR: this DDQN-only script requires array IDs 80..99; got ${ID:-<unset>}"
+    exit 2
+fi
+
+if [ -x "$PY_PRIMARY" ]; then PY="$PY_PRIMARY"; PY_SOURCE="custom_runtime";
+elif [ -x "$PY_FALLBACK" ]; then PY="$PY_FALLBACK"; PY_SOURCE="conda_fallback";
+else echo "ERROR: no usable Python executable"; exit 127; fi
+
+OFFSET=$((ID - 80))
+SEEDS=(42 123 456 789 1000)
+LAMBDAS=(1.0 2.0 3.0 3.4)
+SEED_INDEX=$((OFFSET % 5))
+LAMBDA_INDEX=$((OFFSET / 5))
+SEED="${SEEDS[$SEED_INDEX]}"
+LAMBDA="${LAMBDAS[$LAMBDA_INDEX]}"
+METHOD="ddqn"
+SCRIPT="experiments/bratu_ddqn_single.py"
+LAM_TAG="${LAMBDA/./p}"
+LOG_DIR="$PROJECT_ROOT/results/array_logs"
+STATUS_DIR="$PROJECT_ROOT/results/array_status"
+mkdir -p "$LOG_DIR" "$STATUS_DIR"
+CASE_TAG=$(printf "case_%03d_%s_lambda_%s_seed_%s" "$ID" "$METHOD" "$LAM_TAG" "$SEED")
+CASE_LOG="$LOG_DIR/${CASE_TAG}.log"
+CASE_STATUS="$STATUS_DIR/${CASE_TAG}.status"
+HOST=$(hostname)
+START_EPOCH=$(date +%s)
+: > "$CASE_LOG"
+
+{
+ echo "============================================================================="
+ echo "BRATU DDQN BENCHMARK-V2 RERUN"
+ echo "============================================================================="
+ echo "Protocol             : $PROTOCOL"
+ echo "Selection protocol   : $SELECTION_PROTOCOL"
+ echo "Array ID             : $ID"
+ echo "Method               : $METHOD"
+ echo "Lambda               : $LAMBDA"
+ echo "Outer seed           : $SEED"
+ echo "Host                 : $HOST"
+ echo "Python executable    : $PY"
+ echo "Python source        : $PY_SOURCE"
+ echo "Candidates           : 5 matched candidate PINNs"
+ echo "Controller/replay    : persistent across candidates"
+ echo "Fresh sixth PINN     : NO"
+ echo "Reference in select. : NO"
+ echo "All-candidate audit  : YES, after selection"
+ echo "============================================================================="
+} | tee -a "$CASE_LOG"
+
+BRATU_PROTOCOL_VERSION="$PROTOCOL" \
+BRATU_LAMBDA="$LAMBDA" BRATU_SEED="$SEED" \
+BRATU_LEARNING_RATE="0.001" BRATU_N_COLLOCATION="256" \
+BRATU_N_VALIDATION="512" BRATU_N_TEST="2000" \
+BRATU_TOTAL_PINN_STEPS="15000" BRATU_WARMUP_STEPS="200" \
+BRATU_DECISION_INTERVAL="20" BRATU_DDQN_TRAIN_EPISODES="5" \
+BRATU_SELECTION_CANDIDATES="5" BRATU_CANDIDATE_SEED_STRIDE="1000003" \
+BRATU_WEIGHT_LOG_INTERVAL="20" \
+PYTHONHOME="$ENV" PYTHONPATH="$TORCHROOT:$PROJECT_ROOT" \
+LD_LIBRARY_PATH="$GLIBC/lib:$ENV/lib:$TORCHLIB:/usr/lib64:/lib64" \
+OMP_NUM_THREADS="1" MKL_NUM_THREADS="1" MPLBACKEND="Agg" \
+"$PY" "$SCRIPT" 2>&1 | tee -a "$CASE_LOG"
+
+EXIT_CODE=${PIPESTATUS[0]}
+END_EPOCH=$(date +%s)
+WALL_TIME=$((END_EPOCH - START_EPOCH))
+{
+ echo "array_id=$ID"; echo "method=$METHOD"; echo "lambda=$LAMBDA"; echo "seed=$SEED"
+ echo "script=$SCRIPT"; echo "protocol=$PROTOCOL"; echo "selection_protocol=$SELECTION_PROTOCOL"
+ echo "selection_candidates=5"; echo "candidate_seed_stride=1000003"; echo "host=$HOST"
+ echo "python=$PY"; echo "python_source=$PY_SOURCE"; echo "start_epoch=$START_EPOCH"
+ echo "end_epoch=$END_EPOCH"; echo "wall_time_seconds=$WALL_TIME"; echo "exit_code=$EXIT_CODE"
+ echo "log=$CASE_LOG"
+} > "$CASE_STATUS"
+
+echo "CASE FINISHED | ID=$ID | exit=$EXIT_CODE | seconds=$WALL_TIME" | tee -a "$CASE_LOG"
+exit "$EXIT_CODE"

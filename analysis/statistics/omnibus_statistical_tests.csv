@@ -1,0 +1,3 @@
+test,statistic,p_value,n_blocks
+Conventional Friedman (20 lambda-seed cases),9.100000000000023,0.010567204383852532,20
+Exact method-label permutations within five seed blocks,9.100000000000023,0.046296296296296294,5

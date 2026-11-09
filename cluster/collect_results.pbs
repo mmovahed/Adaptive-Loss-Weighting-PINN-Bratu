@@ -1,0 +1,39 @@
+#!/bin/bash
+#PBS -S /bin/bash
+#PBS -q lumer
+#PBS -N bratu_collect_v2
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=00:20:00
+#PBS -j oe
+
+PROJECT_ROOT=${BRATU_PROJECT_ROOT:?Export BRATU_PROJECT_ROOT to your repository directory}
+BASE=${BRATU_WORK_BASE:-$PROJECT_ROOT}
+ENV=${BRATU_PYTHON_ENV:-$HOME/.conda/envs/bratu}
+PY_PRIMARY=$BASE/runtime/python37_glibc217
+PY_FALLBACK=$ENV/bin/python
+PROTOCOL=bratu_adaptive_benchmark_v2
+
+cd "$PROJECT_ROOT" || exit 2
+if [ -x "$PY_PRIMARY" ]; then PY="$PY_PRIMARY"; PY_SOURCE="custom_runtime";
+elif [ -x "$PY_FALLBACK" ]; then PY="$PY_FALLBACK"; PY_SOURCE="conda_fallback";
+else echo "ERROR: no usable Python executable"; exit 127; fi
+
+export PYTHONHOME="$ENV"
+
+echo "============================================================================="
+echo "BRATU ADAPTIVE BENCHMARK V2 - RESULT COLLECTION"
+echo "============================================================================="
+echo "Host               : $(hostname)"
+echo "Started            : $(date)"
+echo "Queue              : lumer"
+echo "PBS_JOBID          : ${PBS_JOBID:-<unset>}"
+echo "Project root       : $PROJECT_ROOT"
+echo "Python executable  : $PY"
+echo "Python source      : $PY_SOURCE"
+echo "Expected protocol  : $PROTOCOL"
+echo "Selection protocol : matched_best_of_n_validation_v2"
+echo "Expected cases     : 100"
+echo "Expected candidates: 500"
+echo "============================================================================="
+
+"$PY" cluster/collect_array_results.py

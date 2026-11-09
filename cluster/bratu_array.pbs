@@ -1,0 +1,185 @@
+#!/bin/bash
+#PBS -S /bin/bash
+#PBS -q lumer
+#PBS -N bratu_benchmark_v2
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=12:00:00
+#PBS -t 0-99
+#PBS -j oe
+
+# ============================================================================
+# Bratu adaptive loss-weighting benchmark v2 on Cluster
+# 5 methods x 4 lambdas x 5 outer seeds = 100 array jobs.
+# Every job trains five matched candidate PINNs. Candidate selection uses ONLY
+# S_val = Lf_val + Lb_val. The numerical reference is accessed only after the
+# candidate has been selected, then all five candidates are audited on test.
+# ============================================================================
+
+PROJECT_ROOT=${BRATU_PROJECT_ROOT:?Export BRATU_PROJECT_ROOT to your repository directory}
+BASE=${BRATU_WORK_BASE:-$PROJECT_ROOT}
+ENV=${BRATU_PYTHON_ENV:-$HOME/.conda/envs/bratu}
+GLIBC=/share/Application/glibc/glibc-2.17/glibc-2.17/install
+PY_PRIMARY=$BASE/runtime/python37_glibc217
+PY_FALLBACK=$ENV/bin/python
+TORCHROOT=$BASE/bratu_torch151
+TORCHLIB=$TORCHROOT/torch/lib
+PROTOCOL=bratu_adaptive_benchmark_v2
+SELECTION_PROTOCOL=matched_best_of_n_validation_v2
+
+cd "$PROJECT_ROOT" || exit 2
+
+ID="${PBS_ARRAYID:-${PBS_ARRAY_INDEX:-}}"
+if [ -z "$ID" ]; then
+    echo "ERROR: PBS array index is not available."
+    exit 2
+fi
+
+SEEDS=(42 123 456 789 1000)
+LAMBDAS=(1.0 2.0 3.0 3.4)
+SEED_INDEX=$((ID % 5))
+TMP=$((ID / 5))
+LAMBDA_INDEX=$((TMP % 4))
+METHOD_INDEX=$((TMP / 4))
+SEED="${SEEDS[$SEED_INDEX]}"
+LAMBDA="${LAMBDAS[$LAMBDA_INDEX]}"
+
+case "$METHOD_INDEX" in
+    0) METHOD="fixed_equal";    SCRIPT="experiments/bratu_experiment.py" ;;
+    1) METHOD="fixed_selected"; SCRIPT="experiments/bratu_fixed_selected.py" ;;
+    2) METHOD="lra";            SCRIPT="experiments/bratu_lra.py" ;;
+    3) METHOD="relobralo";      SCRIPT="experiments/bratu_relobralo.py" ;;
+    4) METHOD="ddqn";           SCRIPT="experiments/bratu_ddqn_single.py" ;;
+    *) echo "ERROR: invalid METHOD_INDEX=$METHOD_INDEX"; exit 2 ;;
+esac
+
+if [ -x "$PY_PRIMARY" ]; then
+    PY="$PY_PRIMARY"
+    PY_SOURCE="custom_runtime"
+elif [ -x "$PY_FALLBACK" ]; then
+    PY="$PY_FALLBACK"
+    PY_SOURCE="conda_fallback"
+else
+    echo "ERROR: no usable Python executable found."
+    echo "Tried: $PY_PRIMARY"
+    echo "Tried: $PY_FALLBACK"
+    exit 127
+fi
+
+LAM_TAG="${LAMBDA/./p}"
+LOG_DIR="$PROJECT_ROOT/results/array_logs"
+STATUS_DIR="$PROJECT_ROOT/results/array_status"
+mkdir -p "$LOG_DIR" "$STATUS_DIR"
+CASE_TAG=$(printf "case_%03d_%s_lambda_%s_seed_%s" "$ID" "$METHOD" "$LAM_TAG" "$SEED")
+CASE_LOG="$LOG_DIR/${CASE_TAG}.log"
+CASE_STATUS="$STATUS_DIR/${CASE_TAG}.status"
+HOST=$(hostname)
+START_EPOCH=$(date +%s)
+: > "$CASE_LOG"
+
+{
+    echo "============================================================================="
+    echo "BRATU ADAPTIVE LOSS-WEIGHTING BENCHMARK V2"
+    echo "============================================================================="
+    echo "Protocol             : $PROTOCOL"
+    echo "Selection protocol   : $SELECTION_PROTOCOL"
+    echo "Array ID             : $ID"
+    echo "Method               : $METHOD"
+    echo "Lambda               : $LAMBDA"
+    echo "Outer seed           : $SEED"
+    echo "Script               : $SCRIPT"
+    echo "Host                 : $HOST"
+    echo "Started              : $(date)"
+    echo "Queue                : lumer"
+    echo "PBS_JOBID            : ${PBS_JOBID:-<unset>}"
+    echo "PBS_ARRAYID          : ${PBS_ARRAYID:-${PBS_ARRAY_INDEX:-<unset>}}"
+    echo "Project root         : $PROJECT_ROOT"
+    echo "Python executable    : $PY"
+    echo "Python source        : $PY_SOURCE"
+    echo "Conda/Python home    : $ENV"
+    echo "PyTorch root         : $TORCHROOT"
+    echo "Custom glibc         : $GLIBC"
+    echo "OMP_NUM_THREADS      : 1"
+    echo "MKL_NUM_THREADS      : 1"
+    echo "Candidates per case  : 5"
+    echo "Candidate seed stride: 1000003"
+    echo "PINN updates/cand.   : 15000"
+    echo "Collocation points   : 256 exact interior"
+    echo "Validation points    : 512 exact interior"
+    echo "Boundary loss        : mean[u(0)^2,u(1)^2]"
+    echo "Selection criterion  : unweighted Lf_val + Lb_val"
+    echo "Reference in select. : NO"
+    echo "All-candidate audit  : YES, after selection"
+    echo "LRA                   : reference code, smooth=0.9, update every 10"
+    echo "ReLoBRaLo             : alpha=0.999, P(rho=1)=0.9999, T=0.1"
+    echo "DDQN                  : 5 persistent-controller candidate episodes"
+    echo "Log                   : $CASE_LOG"
+    echo "============================================================================="
+} | tee -a "$CASE_LOG"
+
+# Pin the final benchmark configuration explicitly.
+BRATU_PROTOCOL_VERSION="$PROTOCOL" \
+BRATU_LAMBDA="$LAMBDA" \
+BRATU_SEED="$SEED" \
+BRATU_LEARNING_RATE="0.001" \
+BRATU_N_COLLOCATION="256" \
+BRATU_N_VALIDATION="512" \
+BRATU_N_TEST="2000" \
+BRATU_TOTAL_PINN_STEPS="15000" \
+BRATU_WARMUP_STEPS="200" \
+BRATU_DECISION_INTERVAL="20" \
+BRATU_DDQN_TRAIN_EPISODES="5" \
+BRATU_SELECTION_CANDIDATES="5" \
+BRATU_CANDIDATE_SEED_STRIDE="1000003" \
+BRATU_LRA_SMOOTHING="0.9" \
+BRATU_LRA_UPDATE_INTERVAL="10" \
+BRATU_RELOBRALO_ALPHA="0.999" \
+BRATU_RELOBRALO_RHO="0.9999" \
+BRATU_RELOBRALO_TEMPERATURE="0.1" \
+BRATU_FIXED_SELECTED_ALPHA="1.0" \
+BRATU_FIXED_SELECTED_BETA="3.0" \
+BRATU_WEIGHT_LOG_INTERVAL="20" \
+PYTHONHOME="$ENV" \
+PYTHONPATH="$TORCHROOT:$PROJECT_ROOT" \
+LD_LIBRARY_PATH="$GLIBC/lib:$ENV/lib:$TORCHLIB:/usr/lib64:/lib64" \
+OMP_NUM_THREADS="1" \
+MKL_NUM_THREADS="1" \
+MPLBACKEND="Agg" \
+"$PY" "$SCRIPT" 2>&1 | tee -a "$CASE_LOG"
+
+EXIT_CODE=${PIPESTATUS[0]}
+END_EPOCH=$(date +%s)
+WALL_TIME=$((END_EPOCH - START_EPOCH))
+
+{
+    echo "array_id=$ID"
+    echo "method=$METHOD"
+    echo "lambda=$LAMBDA"
+    echo "seed=$SEED"
+    echo "script=$SCRIPT"
+    echo "protocol=$PROTOCOL"
+    echo "selection_protocol=$SELECTION_PROTOCOL"
+    echo "selection_candidates=5"
+    echo "candidate_seed_stride=1000003"
+    echo "host=$HOST"
+    echo "python=$PY"
+    echo "python_source=$PY_SOURCE"
+    echo "start_epoch=$START_EPOCH"
+    echo "end_epoch=$END_EPOCH"
+    echo "wall_time_seconds=$WALL_TIME"
+    echo "exit_code=$EXIT_CODE"
+    echo "log=$CASE_LOG"
+} > "$CASE_STATUS"
+
+{
+    echo
+    echo "============================================================================="
+    echo "CASE FINISHED"
+    echo "Array ID          : $ID"
+    echo "Method            : $METHOD"
+    echo "Exit code         : $EXIT_CODE"
+    echo "Wall time seconds : $WALL_TIME"
+    echo "Status file       : $CASE_STATUS"
+    echo "============================================================================="
+} | tee -a "$CASE_LOG"
+
+exit "$EXIT_CODE"

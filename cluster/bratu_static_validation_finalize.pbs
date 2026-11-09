@@ -1,0 +1,29 @@
+#!/bin/bash
+#PBS -S /bin/bash
+#PBS -q lumer
+#PBS -N bratu_val_lock
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=00:20:00
+#PBS -j oe
+set -o pipefail
+PROJECT_ROOT=${BRATU_PROJECT_ROOT:?Export BRATU_PROJECT_ROOT to your repository directory}
+BASE=${BRATU_WORK_BASE:-$PROJECT_ROOT}
+ENV=${BRATU_PYTHON_ENV:-$HOME/.conda/envs/bratu}
+GLIBC=/share/Application/glibc/glibc-2.17/glibc-2.17/install
+TORCHROOT=$BASE/bratu_torch151
+TORCHLIB=$TORCHROOT/torch/lib
+PY_PRIMARY=$BASE/runtime/python37_glibc217
+PY_FALLBACK=$ENV/bin/python
+if [ -x "$PY_PRIMARY" ]; then PY=$PY_PRIMARY;
+elif [ -x "$PY_FALLBACK" ]; then PY=$PY_FALLBACK;
+else echo 'ERROR: Cluster Python not found'; exit 127; fi
+cd "$PROJECT_ROOT" || exit 2
+export BRATU_TOTAL_PINN_STEPS=15000 BRATU_N_COLLOCATION=256 BRATU_N_VALIDATION=512
+export BRATU_N_TEST=2000 BRATU_SELECTION_CANDIDATES=5 BRATU_CANDIDATE_SEED_STRIDE=1000003
+export BRATU_LEARNING_RATE=0.001 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 MPLBACKEND=Agg
+# Keep the custom glibc and Python paths local to Python (original Cluster pattern).
+# Do NOT export LD_LIBRARY_PATH globally: it breaks system utilities like tee.
+PYTHONHOME="$ENV" \
+PYTHONPATH="$TORCHROOT:$PROJECT_ROOT" \
+LD_LIBRARY_PATH="$GLIBC/lib:$ENV/lib:$TORCHLIB:/usr/lib64:/lib64" \
+"$PY" -u experiments/bratu_static_validation_tune.py --finalize

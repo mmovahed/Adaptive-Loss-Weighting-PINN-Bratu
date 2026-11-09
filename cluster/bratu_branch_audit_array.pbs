@@ -1,0 +1,43 @@
+#!/bin/bash
+#PBS -S /bin/bash
+#PBS -q lumer
+#PBS -N bratu_branch_audit
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=12:00:00
+#PBS -t 0-4
+#PBS -j oe
+
+set -u
+PROJECT_ROOT=${BRATU_PROJECT_ROOT:?Export BRATU_PROJECT_ROOT to your repository directory}
+BASE=${BRATU_WORK_BASE:-$PROJECT_ROOT}
+ENV=${BRATU_PYTHON_ENV:-$HOME/.conda/envs/bratu}
+GLIBC=/share/Application/glibc/glibc-2.17/glibc-2.17/install
+PY_PRIMARY=$BASE/runtime/python37_glibc217
+PY_FALLBACK=$ENV/bin/python
+TORCHROOT=$BASE/bratu_torch151
+TORCHLIB=$TORCHROOT/torch/lib
+cd "$PROJECT_ROOT" || exit 2
+ID="${PBS_ARRAYID:-${PBS_ARRAY_INDEX:-}}"
+[ -n "$ID" ] || { echo 'Missing array ID'; exit 2; }
+if [ -x "$PY_PRIMARY" ]; then PY="$PY_PRIMARY"; else PY="$PY_FALLBACK"; fi
+[ -x "$PY" ] || { echo 'Python executable not found'; exit 127; }
+mkdir -p "$PROJECT_ROOT/results/branch_audit_v1/logs"
+LOG="$PROJECT_ROOT/results/branch_audit_v1/logs/branch_audit_${ID}.log"
+echo "Running branch replay $ID on $(hostname); log=$LOG"
+# Crucial: custom glibc is applied ONLY to Python, never exported to shell tools.
+BRATU_TOTAL_PINN_STEPS=15000 \
+BRATU_WARMUP_STEPS=200 \
+BRATU_DECISION_INTERVAL=20 \
+BRATU_SELECTION_CANDIDATES=5 \
+BRATU_DDQN_TRAIN_EPISODES=5 \
+BRATU_N_COLLOCATION=256 \
+BRATU_N_VALIDATION=512 \
+BRATU_N_TEST=2000 \
+PYTHONHOME="$ENV" \
+PYTHONPATH="$TORCHROOT:$PROJECT_ROOT" \
+LD_LIBRARY_PATH="$GLIBC/lib:$ENV/lib:$TORCHLIB:/usr/lib64:/lib64" \
+OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 CUDA_VISIBLE_DEVICES='' \
+"$PY" experiments/bratu_branch_targeted_replay.py --index "$ID" > "$LOG" 2>&1
+STATUS=$?
+echo "Exit code: $STATUS; log: $LOG"
+exit "$STATUS"
