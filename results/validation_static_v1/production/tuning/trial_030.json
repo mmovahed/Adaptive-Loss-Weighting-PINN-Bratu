@@ -1,0 +1,52 @@
+{
+  "alpha": 1.0,
+  "beta": 1.0,
+  "boundary_validation_loss": 1.0309837307431735e-05,
+  "config": {
+    "architecture": [
+      64,
+      64,
+      64
+    ],
+    "candidate_seed_stride": 1000003,
+    "candidate_selector": "min_unweighted_Lf_val_plus_Lb_val",
+    "learning_rate": 0.001,
+    "n_collocation": 256,
+    "n_test": 2000,
+    "n_validation": 512,
+    "selection_candidates": 5,
+    "total_pinn_steps": 15000,
+    "underlying_benchmark": "bratu_adaptive_benchmark_v2"
+  },
+  "environment": {
+    "cuda_available": false,
+    "device": "cpu",
+    "hostname": "compute-0-20.local",
+    "numpy": "1.19.2",
+    "pbs_array_id": "30",
+    "pbs_job_id": "404028[30].cluster.sbu.ac.ir",
+    "python": "3.7.9 (default, Aug 31 2020, 12:42:55) ",
+    "torch": "1.5.1+cpu",
+    "torch_threads": 1
+  },
+  "index": 30,
+  "lambda": 3.0,
+  "phase": "tuning",
+  "physics_validation_loss": 0.00015698875358793885,
+  "protocol": "bratu_validation_only_static_v1",
+  "seed": 2027,
+  "smoke": false,
+  "source_sha256": {
+    "configs/bratu_config.py": "53adfae453487cfcb6ec1b40cdf9b0e00501ad7935fc6d02fb30999aff758582",
+    "experiments/bratu_fixed_validation.py": "aee56cdc9fb3eb20e57658d995abcfdce8443d7eb31b0052517b84edb170bda4",
+    "experiments/bratu_static_validation_tune.py": "998d21e6cec6d70135d030f49b7ce624a7442dd4dac6be6303824ac590b5de6e",
+    "models/pinn.py": "7563302f985152459e16a391526b55c5bd6bbfb443604d0257aa151703e06066",
+    "problems/bratu.py": "7bcb9f4780bfeeffa4368e2f85df71b04c59be619351f28a1eb791b96453b328",
+    "training/trainer.py": "5395b3013f38ed34ba39bc84e9c0edfa56caa611e88e10b56fcd4748243271f9",
+    "utils/bratu_eval.py": "21012656876d505c3cd8cd1b813ff66de68b4c6ca833d0f5c10566e4146f99d7",
+    "utils/fair_selection.py": "69208b00dec63c2f1c3ebf6df98fc0ddae136c163d78c614a85d53ace832e69e",
+    "utils/static_validation_baseline.py": "96bae04bf5aa3876729cb0a77636625238e2585763bee0d8029d617b289da98c"
+  },
+  "train_seconds": 243.05109167099,
+  "validation_score": 0.00016729859089537058
+}
