@@ -1,0 +1,183 @@
+{
+  "config": {
+    "architecture": [
+      64,
+      64,
+      64
+    ],
+    "candidate_seed_stride": 1000003,
+    "candidate_selector": "min_unweighted_Lf_val_plus_Lb_val",
+    "learning_rate": 0.001,
+    "n_collocation": 256,
+    "n_test": 2000,
+    "n_validation": 512,
+    "selection_candidates": 5,
+    "total_pinn_steps": 15000,
+    "underlying_benchmark": "bratu_adaptive_benchmark_v2"
+  },
+  "development_lambdas": [
+    1.0,
+    2.0,
+    3.0,
+    3.4
+  ],
+  "development_seeds": [
+    2027,
+    2029,
+    2039
+  ],
+  "final_evaluation_seeds": [
+    42,
+    123,
+    456,
+    789,
+    1000
+  ],
+  "grid_summary": [
+    {
+      "alpha": 1.0,
+      "beta": 0.1,
+      "geometric_mean_validation_score": 0.00013806068057642168,
+      "mean_log_validation_score": -8.887817255131186,
+      "mean_validation_score": 0.0033566720517056634,
+      "std_validation_score": 0.005345047245915174
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.3,
+      "geometric_mean_validation_score": 5.062680470033536e-05,
+      "mean_log_validation_score": -9.891029384771274,
+      "mean_validation_score": 0.00046697230487458344,
+      "std_validation_score": 0.0009919174135494696
+    },
+    {
+      "alpha": 1.0,
+      "beta": 1.0,
+      "geometric_mean_validation_score": 3.0161688147805277e-05,
+      "mean_log_validation_score": -10.408938043320486,
+      "mean_validation_score": 0.0004763268369989827,
+      "std_validation_score": 0.0014002622484963624
+    },
+    {
+      "alpha": 1.0,
+      "beta": 3.0,
+      "geometric_mean_validation_score": 2.881549369931618e-05,
+      "mean_log_validation_score": -10.454597339808705,
+      "mean_validation_score": 0.00019300969053873823,
+      "std_validation_score": 0.0003275973657160027
+    },
+    {
+      "alpha": 1.0,
+      "beta": 10.0,
+      "geometric_mean_validation_score": 9.860131636478187e-05,
+      "mean_log_validation_score": -9.224425945889205,
+      "mean_validation_score": 0.0011519151138166912,
+      "std_validation_score": 0.0021409895434133875
+    }
+  ],
+  "n_tuning_fits": 60,
+  "phase": "locked_validation_only",
+  "protocol": "bratu_validation_only_static_v1",
+  "search_grid": [
+    [
+      1.0,
+      0.1
+    ],
+    [
+      1.0,
+      0.3
+    ],
+    [
+      1.0,
+      1.0
+    ],
+    [
+      1.0,
+      3.0
+    ],
+    [
+      1.0,
+      10.0
+    ]
+  ],
+  "selected_alpha": 1.0,
+  "selected_beta": 3.0,
+  "selected_objective": -10.454597339808705,
+  "smoke": false,
+  "source_sha256": {
+    "configs/bratu_config.py": "53adfae453487cfcb6ec1b40cdf9b0e00501ad7935fc6d02fb30999aff758582",
+    "experiments/bratu_fixed_validation.py": "aee56cdc9fb3eb20e57658d995abcfdce8443d7eb31b0052517b84edb170bda4",
+    "experiments/bratu_static_validation_tune.py": "998d21e6cec6d70135d030f49b7ce624a7442dd4dac6be6303824ac590b5de6e",
+    "models/pinn.py": "7563302f985152459e16a391526b55c5bd6bbfb443604d0257aa151703e06066",
+    "problems/bratu.py": "7bcb9f4780bfeeffa4368e2f85df71b04c59be619351f28a1eb791b96453b328",
+    "training/trainer.py": "5395b3013f38ed34ba39bc84e9c0edfa56caa611e88e10b56fcd4748243271f9",
+    "utils/bratu_eval.py": "21012656876d505c3cd8cd1b813ff66de68b4c6ca833d0f5c10566e4146f99d7",
+    "utils/fair_selection.py": "69208b00dec63c2f1c3ebf6df98fc0ddae136c163d78c614a85d53ace832e69e",
+    "utils/static_validation_baseline.py": "96bae04bf5aa3876729cb0a77636625238e2585763bee0d8029d617b289da98c"
+  },
+  "tie_breaker": "first listed pair",
+  "trial_paths": [
+    "tuning/trial_000.json",
+    "tuning/trial_001.json",
+    "tuning/trial_002.json",
+    "tuning/trial_003.json",
+    "tuning/trial_004.json",
+    "tuning/trial_005.json",
+    "tuning/trial_006.json",
+    "tuning/trial_007.json",
+    "tuning/trial_008.json",
+    "tuning/trial_009.json",
+    "tuning/trial_010.json",
+    "tuning/trial_011.json",
+    "tuning/trial_012.json",
+    "tuning/trial_013.json",
+    "tuning/trial_014.json",
+    "tuning/trial_015.json",
+    "tuning/trial_016.json",
+    "tuning/trial_017.json",
+    "tuning/trial_018.json",
+    "tuning/trial_019.json",
+    "tuning/trial_020.json",
+    "tuning/trial_021.json",
+    "tuning/trial_022.json",
+    "tuning/trial_023.json",
+    "tuning/trial_024.json",
+    "tuning/trial_025.json",
+    "tuning/trial_026.json",
+    "tuning/trial_027.json",
+    "tuning/trial_028.json",
+    "tuning/trial_029.json",
+    "tuning/trial_030.json",
+    "tuning/trial_031.json",
+    "tuning/trial_032.json",
+    "tuning/trial_033.json",
+    "tuning/trial_034.json",
+    "tuning/trial_035.json",
+    "tuning/trial_036.json",
+    "tuning/trial_037.json",
+    "tuning/trial_038.json",
+    "tuning/trial_039.json",
+    "tuning/trial_040.json",
+    "tuning/trial_041.json",
+    "tuning/trial_042.json",
+    "tuning/trial_043.json",
+    "tuning/trial_044.json",
+    "tuning/trial_045.json",
+    "tuning/trial_046.json",
+    "tuning/trial_047.json",
+    "tuning/trial_048.json",
+    "tuning/trial_049.json",
+    "tuning/trial_050.json",
+    "tuning/trial_051.json",
+    "tuning/trial_052.json",
+    "tuning/trial_053.json",
+    "tuning/trial_054.json",
+    "tuning/trial_055.json",
+    "tuning/trial_056.json",
+    "tuning/trial_057.json",
+    "tuning/trial_058.json",
+    "tuning/trial_059.json"
+  ],
+  "tuning_rule": "argmin mean(log(max(Lf_val+Lb_val,1e-30))) across 4 lambdas x 3 dev seeds",
+  "tuning_train_seconds_total": 13750.683793723583
+}
