@@ -1,4 +1,4 @@
-# Reproducibility resources: Adaptive PINN loss weighting
+# Adaptive PINN loss weighting
 
 This repository accompanies **Adaptive Loss Weighting in Physics-Informed Neural Networks for the Bratu Problem: A Comparative Study**. It provides the experiment implementations, run-level results (including nonselected and high-error candidates), plotting code, numerical summaries, and consistency tests.
 
