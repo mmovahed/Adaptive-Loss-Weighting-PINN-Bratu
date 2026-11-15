@@ -2,6 +2,12 @@
 
 This repository accompanies **Adaptive Loss Weighting in Physics-Informed Neural Networks for the Bratu Problem: A Comparative Study**. It provides the experiment implementations, run-level results (including nonselected and high-error candidates), plotting code, numerical summaries, and consistency tests.
 
+## Archived release
+
+The reproducibility package is permanently archived on Zenodo:
+
+https://doi.org/10.5281/zenodo.24243980
+
 ## Repository layout
 
 | Directory | Contents |
