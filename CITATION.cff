@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this research software or its archived results, please cite this repository."
+type: software
+title: "Adaptive Loss Weighting in Physics-Informed Neural Networks for the Bratu Problem: A Comparative Study — Reproducibility Package"
+authors:
+  - given-names: Sina
+    family-names: Mousavi Sabet
+  - given-names: Mahdi
+    family-names: Movahedian Moghaddam
+  - given-names: Arshia
+    family-names: Omrani
+  - given-names: Kourosh
+    family-names: Parand
+version: 1.0.1
+repository-code: "https://github.com/mmovahed/Adaptive-Loss-Weighting-PINN-Bratu"
+abstract: >-
+  Research software, experiment configurations, and archived numerical results
+  supporting a comparative study of adaptive loss-weighting strategies for
+  physics-informed neural networks on the Bratu problem and supplementary PDE benchmarks.
