@@ -1,0 +1,79 @@
+DDQN ABLATION | index=3 | mode=original_control | lambda=1.0 | seed=789 | smoke=False
+/bin/sh: error while loading shared libraries: __vdso_time: invalid mode for dlopen(): Invalid argument
+
+==============================================================================
+SARMAD / RUNTIME CONFIGURATION
+==============================================================================
+Protocol version       : bratu_adaptive_benchmark_v2
+Method                 : ddqn_original_control
+Host                   : compute-0-20.local
+Platform               : Linux-2.6.32-642.el6.x86_64-x86_64-with-centos-6.8-Final
+Machine                : x86_64
+CPU model              : Intel(R) Xeon(R) CPU E5-2699 v4 @ 2.20GHz
+libc                   : glibc 2.10
+PBS job id             : 404048[3].cluster.sbu.ac.ir
+PBS array id           : 3
+PBS queue              : lumer
+Python executable      : /share/users/k_parand/movahedian/runtime/python37_glibc217
+Python version         : 3.7.9 (default, Aug 31 2020, 12:42:55)  [GCC 7.3.0]
+NumPy version          : 1.19.2
+SciPy version          : 1.6.2
+PyTorch version        : 1.5.1+cpu
+PyTorch CUDA build     : None
+CUDA available         : False
+Selected device        : cpu
+Torch CPU threads      : 1
+OMP_NUM_THREADS        : 1
+MKL_NUM_THREADS        : 1
+PYTHONHOME             : /share/users/k_parand/.conda/envs/myenv3.8
+PYTHONPATH             : /share/users/k_parand/movahedian/bratu_torch151:/share/users/k_parand/movahedian/Adaptive_After_Revision/V1
+LD_LIBRARY_PATH        : /share/Application/glibc/glibc-2.17/glibc-2.17/install/lib:/share/users/k_parand/.conda/envs/myenv3.8/lib:/share/users/k_parand/movahedian/bratu_torch151/torch/lib:/usr/lib64:/lib64
+------------------------------------------------------------------------------
+Lambda                 : 1.0
+Outer seed             : 789
+Candidate count        : 5
+Candidate seed stride  : 1000003
+Candidate seeds        : 1000792, 2000795, 3000798, 4000801, 5000804
+PINN architecture      : 1-64-64-64-1
+Learning rate          : 0.001
+Interior collocation   : 256
+Interior validation    : 512
+Test points            : 2000
+Boundary loss          : mean squared error over x=0,1
+PINN updates/candidate : 15000
+DDQN train episodes    : 5
+Warm-up steps          : 200
+Decision interval      : 20
+Selection protocol     : matched_best_of_n_validation_v2
+Selection criterion    : unweighted Lf_val + Lb_val
+Reference in selection : NO
+Post-selection audit   : test metrics saved for ALL candidates
+LRA smoothing          : 0.9
+LRA update interval    : 10
+ReLoBRaLo alpha        : 0.999
+ReLoBRaLo rho P        : 0.9999
+ReLoBRaLo temperature  : 0.1
+Ablation mode          : original_control
+DDQN action dim        : 25
+DDQN batch size        : 32
+DDQN protocol          : persistent controller/replay across candidate PINNs
+DDQN replay size       : 5000
+DDQN state dim         : 7
+DDQN target update     : 100
+Weight normalization   : independent clipping to [0.01,100]
+==============================================================================
+
+==============================================================================
+ADAPTIVE-WEIGHTING BENCHMARK | DDQN | MATCHED BEST-OF-5
+Controller/replay persist across candidates; no fresh sixth PINN.
+==============================================================================
+Candidate 01 | seed=1000792 | S_val=2.327501e-03 | Reward=2.981416e+01 | final=(1.000e-02,1.000e+02) | eps=0.0500 | train=188.15s
+Candidate 02 | seed=2000795 | S_val=1.182276e-03 | Reward=3.508208e+01 | final=(1.000e-02,1.000e+02) | eps=0.0500 | train=185.88s
+Candidate 03 | seed=3000798 | S_val=1.736912e-07 | Reward=7.876034e+01 | final=(8.640e+01,3.460e+00) | eps=0.0500 | train=178.23s
+Candidate 04 | seed=4000801 | S_val=5.805916e-07 | Reward=9.183964e+01 | final=(4.199e+01,1.000e+02) | eps=0.0500 | train=156.67s
+Candidate 05 | seed=5000804 | S_val=5.688162e-07 | Reward=8.309911e+01 | final=(1.000e+02,1.000e+02) | eps=0.0500 | train=152.24s
+
+Selected candidate 3 (seed 3000798) | S_val=1.736912e-07 | relL2=2.100216e-04 | final=(8.640000e+01,3.459537e+00)
+RESULT_JSON: {"ablation_protocol": "bratu_ddqn_normalization_ablation_v1", "alpha": 86.40000243186944, "beta": 3.459537073470285, "candidate_agent_action_calls_total": 3700, "candidate_agent_action_seconds_total": 1.1802123486995697, "candidate_agent_optimizer_updates_total": 3669, "candidate_agent_update_seconds_total": 12.118209600448608, "candidate_train_seconds_mean": 172.2360531270504, "candidate_train_seconds_total": 861.180265635252, "candidate_validation_seconds_total": 34.20589831471443, "controller_reused": true, "decision_interval": 20, "device": "cpu", "final_replay_size": 3700, "host": "compute-0-20.local", "lambda": 1.0, "mae": 1.764140688464977e-05, "max_error": 4.2716332245618105e-05, "method": "ddqn_original_control", "mode": "original_control", "mse": 4.6132553332967063e-10, "n_candidates": 5, "n_collocation": 256, "n_validation": 512, "outer_seed": 789, "pinn_steps_per_candidate": 15000, "protocol_version": "bratu_adaptive_benchmark_v2", "relative_l2": 0.00021002156427130103, "selected_candidate": 3, "selected_candidate_seed": 3000798, "selected_episode_reward": 78.76033765421661, "selection_protocol": "matched_best_of_n_validation_v2", "source_sha256": "0c9cc988c5654b0cd47d7d93d792df42f35388931b4f4b7e832ee6601d453380", "torch_version": "1.5.1+cpu", "validation_score": 1.73691238503082e-07, "warmup_steps": 200}
+Results saved to: /share/users/k_parand/movahedian/Adaptive_After_Revision/V1/results/ddqn_ablation_v1/production/runs/ddqn_original_control_lambda_1p0_seed_789.npz and /share/users/k_parand/movahedian/Adaptive_After_Revision/V1/results/ddqn_ablation_v1/production/runs/ddqn_original_control_lambda_1p0_seed_789.json
+ABLATION_JOB_END index=3 exit_code=0 hostname=compute-0-20.local
