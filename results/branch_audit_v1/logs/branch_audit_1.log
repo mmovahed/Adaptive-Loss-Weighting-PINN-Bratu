@@ -1,0 +1,8 @@
+/bin/sh: error while loading shared libraries: __vdso_time: invalid mode for dlopen(): Invalid argument
+Candidate 1/5: seed=1000045, S_val=0.001374637
+Candidate 2/5: seed=2000048, S_val=0.00052437393
+Candidate 3/5: seed=3000051, S_val=0.0025692685
+Candidate 4/5: seed=4000054, S_val=0.00056747013
+Candidate 5/5: seed=5000057, S_val=0.002627793
+OUTPUT /share/users/k_parand/movahedian/Adaptive_After_Revision/V1/results/branch_audit_v1/production/ddqn_lambda_3p4_seed_42.npz
+CLOSER_UPPER [False, False, False, False, False]
